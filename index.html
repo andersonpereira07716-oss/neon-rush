@@ -3,21 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Neon Rush - Overdrive Edition</title>
+  <title>Neon Rush - Ultimate Cyberstorm</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body { background: #080811; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
     canvas { background: linear-gradient(to bottom, #05050f, #120524); display: block; box-shadow: 0 0 30px rgba(0,240,255,0.3); border-radius: 8px; }
-    #ui-overlay { position: absolute; top: 15px; width: 100%; max-width: 380px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; font-size: 1rem; text-shadow: 0 0 8px rgba(0,240,255,0.7); pointer-events: none; z-index: 5; }
-    .menu-screen { position: absolute; background: rgba(8, 8, 17, 0.95); border: 2px solid #00f0ff; border-radius: 16px; padding: 25px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 0 25px rgba(0,240,255,0.4); display: none; z-index: 10; }
-    h1 { color: #00f0ff; font-size: 1.8rem; margin-bottom: 8px; text-shadow: 0 0 12px rgba(0,240,255,0.8); }
+    #ui-overlay { position: absolute; top: 15px; width: 100%; max-width: 380px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; font-size: 0.95rem; text-shadow: 0 0 8px rgba(0,240,255,0.7); pointer-events: none; z-index: 5; }
+    .menu-screen { position: absolute; background: rgba(8, 8, 17, 0.96); border: 2px solid #00f0ff; border-radius: 16px; padding: 25px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 0 25px rgba(0,240,255,0.4); display: none; z-index: 10; }
+    h1 { color: #00f0ff; font-size: 1.7rem; margin-bottom: 8px; text-shadow: 0 0 12px rgba(0,240,255,0.8); }
     p { color: #aaa; font-size: 0.85rem; margin-bottom: 15px; }
     .btn { background: #00f0ff; color: #080811; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 0 10px rgba(0,240,255,0.4); }
     .btn:active { transform: scale(0.97); }
     .btn-secondary { background: rgba(255,0,127,0.15); border: 1.5px solid #ff007f; color: #ff007f; box-shadow: 0 0 10px rgba(255,0,127,0.2); }
+    #pauseBtn { position: absolute; top: 12px; right: 15px; background: rgba(0,240,255,0.1); border: 1px solid #00f0ff; color: #00f0ff; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; z-index: 6; display: none; }
   </style>
 </head>
 <body>
+
+  <button id="pauseBtn" onclick="togglePause()">⏸ PAUSE</button>
 
   <div id="ui-overlay">
     <div id="scoreDisplay">SCORE: 0</div>
@@ -28,9 +31,35 @@
   <!-- Menu Principal -->
   <div id="mainMenu" class="menu-screen" style="display: block;">
     <h1>⚡ NEON RUSH</h1>
-    <p>Overdrive Edition</p>
+    <p>Ultimate Cyberstorm</p>
     <button class="btn" onclick="startGame()">JOGAR</button>
-    <button class="btn btn-secondary" onclick="window.location.href='https://nexa-business-chi.vercel.app'">VOLTAR À NEXA APPS</button>
+    <button class="btn btn-secondary" onclick="openShop()">LOJA DE SKINS</button>
+    <button class="btn btn-secondary" onclick="openRecords()">HISTÓRICO DE RECORDES</button>
+    <button class="btn" onclick="window.location.href='https://nexa-business-chi.vercel.app'" style="background:#333; color:#fff;">VOLTAR À NEXA APPS</button>
+  </div>
+
+  <!-- Loja de Skins -->
+  <div id="shopMenu" class="menu-screen">
+    <h1>LOJA DE SKINS</h1>
+    <p>Personaliza o teu Corredor</p>
+    <button class="btn" onclick="selectSkin('#00f0ff', 'Cyan Cyber')">Cyan Cyber (Atual)</button>
+    <button class="btn btn-secondary" onclick="selectSkin('#ff007f', 'Hot Pink VIP')">Hot Pink VIP</button>
+    <button class="btn btn-secondary" onclick="selectSkin('#ffe600', 'Gold Runner')">Gold Runner</button>
+    <button class="btn" onclick="closeShop()" style="background:#333; color:#fff; margin-top:10px;">VOLTAR</button>
+  </div>
+
+  <!-- Recordes -->
+  <div id="recordsMenu" class="menu-screen">
+    <h1>RECORDES</h1>
+    <div id="recordsList" style="font-size:0.85rem; color:#ccc; margin-bottom:15px; text-align:left;">Sem registos.</div>
+    <button class="btn" onclick="closeRecords()" style="background:#333; color:#fff;">VOLTAR</button>
+  </div>
+
+  <!-- Menu de Pause -->
+  <div id="pauseMenu" class="menu-screen">
+    <h1>JOGO PAUSADO</h1>
+    <button class="btn" onclick="togglePause()">RETOMAR</button>
+    <button class="btn btn-secondary" onclick="goHome()">MENU PRINCIPAL</button>
   </div>
 
   <!-- Game Over -->
@@ -47,75 +76,83 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Web Audio API para efeitos sonoros sintéticos
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-      let osc = audioCtx.createOscillator();
-      let gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      
-      if (type === 'jump') {
-        osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.15);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-      } else if (type === 'crystal') {
-        osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-      } else if (type === 'hit') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.linearRampToValueAtTime(50, audioCtx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.2);
-        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
-      }
-    }
-
-    let gameState = "MENU";
+    let gameState = "MENU"; // MENU, PLAYING, PAUSED, SHOP, RECORDS, GAMEOVER
     let score = 0;
     let hp = 3;
     let crystals = parseInt(localStorage.getItem("nr_crystals") || "0");
-    let overdriveTimer = 0;
+    let currentSkin = localStorage.getItem("nr_skin") || "#00f0ff";
+    let records = JSON.parse(localStorage.getItem("nr_records") || "[]");
 
     let player = { x: 170, y: 440, w: 35, h: 50, vy: 0, gravity: 0.65, jump: -11, grounded: false };
     let obstacles = [];
-    let drones = [];
     let items = [];
     let particles = [];
     let frameCount = 0;
 
     function startGame() {
       document.querySelectorAll('.menu-screen').forEach(m => m.style.display = 'none');
+      document.getElementById('pauseBtn').style.display = 'block';
       gameState = "PLAYING";
       score = 0;
       hp = 3;
       obstacles = [];
-      drones = [];
       items = [];
       particles = [];
       player.y = 440;
       player.vy = 0;
-      overdriveTimer = 0;
     }
 
     function goHome() {
       document.querySelectorAll('.menu-screen').forEach(m => m.style.display = 'none');
+      document.getElementById('pauseBtn').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
       gameState = "MENU";
+    }
+
+    function togglePause() {
+      if (gameState === "PLAYING") {
+        gameState = "PAUSED";
+        document.getElementById('pauseMenu').style.display = 'block';
+        document.getElementById('pauseBtn').style.display = 'none';
+      } else if (gameState === "PAUSED") {
+        document.getElementById('pauseMenu').style.display = 'none';
+        document.getElementById('pauseBtn').style.display = 'block';
+        gameState = "PLAYING";
+      }
+    }
+
+    function openShop() {
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('shopMenu').style.display = 'block';
+    }
+    function closeShop() {
+      document.getElementById('shopMenu').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'block';
+    }
+    function selectSkin(color, name) {
+      currentSkin = color;
+      localStorage.setItem("nr_skin", color);
+      alert("Skin " + name + " selecionada!");
+    }
+
+    function openRecords() {
+      document.getElementById('mainMenu').style.display = 'none';
+      document.getElementById('recordsMenu').style.display = 'block';
+      let html = "";
+      if (records.length === 0) html = "Nenhum recorde ainda.";
+      records.forEach((r, i) => { html += `#${i+1} - ${r.score} pts (${r.date})<br>`; });
+      document.getElementById('recordsList').innerHTML = html;
+    }
+    function closeRecords() {
+      document.getElementById('recordsMenu').style.display = 'none';
+      document.getElementById('mainMenu').style.display = 'block';
     }
 
     window.addEventListener('touchstart', () => {
       if (gameState === "PLAYING" && player.grounded) {
         player.vy = player.jump;
         player.grounded = false;
-        playSound('jump');
-        for(let i=0; i<6; i++) particles.push({x: player.x + 15, y: player.y + 50, vx: (Math.random()-0.5)*4, vy: Math.random()*2, color: '#00f0ff', life: 15});
+        for(let i=0; i<6; i++) particles.push({x: player.x + 15, y: player.y + 50, vx: (Math.random()-0.5)*4, vy: Math.random()*2, color: currentSkin, life: 15});
       }
     });
 
@@ -123,63 +160,35 @@
       if (gameState !== "PLAYING") return;
 
       frameCount++;
-      score += (overdriveTimer > 0 ? 3 : 1);
-      if (overdriveTimer > 0) overdriveTimer--;
+      score += 1;
 
       player.vy += player.gravity;
       player.y += player.vy;
       if (player.y > 440) { player.y = 440; player.vy = 0; player.grounded = true; }
 
-      // Spawner de Obstáculos no Chão
-      if (frameCount % 80 === 0) {
-        obstacles.push({ x: Math.floor(Math.random()*3) * 100 + 40, y: -40, w: 35, h: 35, speed: 5.5 });
-      }
-
-      // Spawner de Drones Aéreos (Nova Função)
-      if (frameCount % 150 === 0) {
-        drones.push({ x: -30, y: 320, w: 40, h: 20, speed: 4, dir: 1 });
-      }
-
-      // Spawner de Cristais e Overdrive
-      if (frameCount % 100 === 0) {
-        items.push({ x: Math.floor(Math.random()*3) * 100 + 45, y: -30, w: 22, h: 22, type: Math.random() > 0.2 ? 'crystal' : 'overdrive' });
-      }
+      // Spawners
+      if (frameCount % 80 === 0) obstacles.push({ x: Math.floor(Math.random()*3) * 100 + 40, y: -40, w: 35, h: 35, speed: 5.5 });
+      if (frameCount % 100 === 0) items.push({ x: Math.floor(Math.random()*3) * 100 + 45, y: -30, w: 22, h: 22 });
 
       // Atualizar Obstáculos
       for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].y += obstacles[i].speed;
         if (player.x < obstacles[i].x + obstacles[i].w && player.x + player.w > obstacles[i].x &&
             player.y < obstacles[i].y + obstacles[i].h && player.y + player.h > obstacles[i].y) {
-          handleDamage();
+          hp--;
           obstacles.splice(i, 1);
+          if (hp <= 0) gameOver();
         }
         if (obstacles[i] && obstacles[i].y > 550) obstacles.splice(i, 1);
       }
 
-      // Atualizar Drones Aéreos
-      for (let i = drones.length - 1; i >= 0; i--) {
-        drones[i].x += drones[i].speed * drones[i].dir;
-        if (drones[i].x > canvas.width || drones[i].x < 0) drones[i].dir *= -1;
-        
-        if (player.x < drones[i].x + drones[i].w && player.x + player.w > drones[i].x &&
-            player.y < drones[i].y + drones[i].h && player.y + player.h > drones[i].y) {
-          handleDamage();
-          drones.splice(i, 1);
-        }
-      }
-
-      // Atualizar Itens
+      // Atualizar Cristais
       for (let i = items.length - 1; i >= 0; i--) {
         items[i].y += 5;
         if (player.x < items[i].x + items[i].w && player.x + player.w > items[i].x &&
             player.y < items[i].y + items[i].h && player.y + player.h > items[i].y) {
-          if (items[i].type === 'crystal') {
-            crystals += 5;
-            localStorage.setItem("nr_crystals", crystals);
-            playSound('crystal');
-          } else {
-            overdriveTimer = 300; // 5 segundos de invencibilidade/pontuação tripla
-          }
+          crystals += 5;
+          localStorage.setItem("nr_crystals", crystals);
           items.splice(i, 1);
         }
         if (items[i] && items[i].y > 550) items.splice(i, 1);
@@ -190,17 +199,14 @@
       document.getElementById("crystalsDisplay").innerText = "💎 " + crystals;
     }
 
-    function handleDamage() {
-      if (overdriveTimer > 0) return; // Invulnerável no Overdrive
-      hp--;
-      playSound('hit');
-      if (hp <= 0) {
-        gameOver();
-      }
-    }
-
     function gameOver() {
       gameState = "GAMEOVER";
+      document.getElementById('pauseBtn').style.display = 'none';
+      records.push({ score: score, date: new Date().toLocaleDateString() });
+      records.sort((a,b) => b.score - a.score);
+      if(records.length > 5) records.pop();
+      localStorage.setItem("nr_records", JSON.stringify(records));
+
       document.getElementById("finalStats").innerText = "Pontuação Final: " + score;
       document.getElementById("gameOverMenu").style.display = "block";
     }
@@ -208,29 +214,20 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Player com cor de Overdrive ou Normal
-      ctx.fillStyle = overdriveTimer > 0 ? "#ffe600" : "#00f0ff";
-      ctx.shadowColor = ctx.fillStyle;
-      ctx.shadowBlur = overdriveTimer > 0 ? 20 : 12;
+      // Player com Skin selecionada
+      ctx.fillStyle = currentSkin;
+      ctx.shadowColor = currentSkin;
+      ctx.shadowBlur = 15;
       ctx.fillRect(player.x, player.y, player.w, player.h);
       ctx.shadowBlur = 0;
 
-      // Obstáculos Chão
+      // Obstáculos
       ctx.fillStyle = "#ff007f";
-      ctx.shadowColor = "#ff007f";
-      ctx.shadowBlur = 10;
       obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
-      ctx.shadowBlur = 0;
 
-      // Drones Aéreos
-      ctx.fillStyle = "#ff9900";
-      drones.forEach(d => ctx.fillRect(d.x, d.y, d.w, d.h));
-
-      // Itens (Cristais / Overdrive)
-      items.forEach(it => {
-        ctx.fillStyle = it.type === 'crystal' ? '#00f0ff' : '#ffe600';
-        ctx.fillRect(it.x, it.y, it.w, it.h);
-      });
+      // Cristais
+      ctx.fillStyle = "#ffe600";
+      items.forEach(it => ctx.fillRect(it.x, it.y, it.w, it.h));
     }
 
     function loop() {
