@@ -1,0 +1,103 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+body {
+    background-color: #0d0d13;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #fff;
+}
+
+#game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    max-width: 480px;
+    max-height: 850px;
+    background: #12121e;
+    overflow: hidden;
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.2);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: rgba(13, 13, 19, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 10;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.neon-title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #00f3ff;
+    text-shadow: 0 0 10px #00f3ff, 0 0 20px #00f3ff, 0 0 40px #00f3ff;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.neon-title-red {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #ff0055;
+    text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+    margin-bottom: 20px;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    color: #a0a0c0;
+    margin-bottom: 30px;
+}
+
+.score-text {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: #e0e0ff;
+}
+
+.neon-btn {
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #0d0d13;
+    background: #00f3ff;
+    border: none;
+    border-radius: 30px;
+    box-shadow: 0 0 15px #00f3ff;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-top: 15px;
+}
+
+.neon-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 5px #00f3ff;
+}

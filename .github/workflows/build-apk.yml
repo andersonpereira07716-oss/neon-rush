@@ -1,0 +1,42 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install Dependencies & Capacitor
+        run: |
+          npm install
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          rm -rf android
+          npx cap init "Neon Rush" com.nexaapps.neonrush --web-dir www
+          npx cap add android
+          npx cap update android
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Build APK with Gradle
+        working-directory: ./android
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: neon-rush-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
