@@ -3,18 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Neon Rush - Ultimate Cyberpunk Edition</title>
+  <title>Neon Rush - Cyberstorm Edition</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body { background: #080811; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
     canvas { background: linear-gradient(to bottom, #05050f, #120524); display: block; box-shadow: 0 0 30px rgba(0,240,255,0.3); border-radius: 8px; }
-    #ui-overlay { position: absolute; top: 15px; width: 100%; max-width: 480px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; font-size: 1.1rem; text-shadow: 0 0 8px rgba(0,240,255,0.7); pointer-events: none; }
-    .menu-screen { position: absolute; background: rgba(8, 8, 17, 0.92); border: 2px solid #00f0ff; border-radius: 16px; padding: 25px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 0 25px rgba(0,240,255,0.4); display: none; z-index: 10; }
-    h1 { color: #00f0ff; font-size: 2rem; margin-bottom: 10px; text-shadow: 0 0 12px rgba(0,240,255,0.8); }
-    p { color: #aaa; font-size: 0.9rem; margin-bottom: 20px; }
-    .btn { background: #00f0ff; color: #080811; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-bottom: 10px; transition: 0.2s; box-shadow: 0 0 10px rgba(0,240,255,0.4); }
+    #ui-overlay { position: absolute; top: 15px; width: 100%; max-width: 400px; display: flex; justify-content: space-between; padding: 0 20px; font-weight: bold; font-size: 1.1rem; text-shadow: 0 0 8px rgba(0,240,255,0.7); pointer-events: none; z-index: 5; }
+    .menu-screen { position: absolute; background: rgba(8, 8, 17, 0.95); border: 2px solid #00f0ff; border-radius: 16px; padding: 25px; width: 90%; max-width: 380px; text-align: center; box-shadow: 0 0 25px rgba(0,240,255,0.4); display: none; z-index: 10; }
+    h1 { color: #00f0ff; font-size: 1.8rem; margin-bottom: 8px; text-shadow: 0 0 12px rgba(0,240,255,0.8); }
+    p { color: #aaa; font-size: 0.85rem; margin-bottom: 15px; }
+    .btn { background: #00f0ff; color: #080811; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 0 10px rgba(0,240,255,0.4); }
     .btn:active { transform: scale(0.97); }
     .btn-secondary { background: rgba(255,0,127,0.15); border: 1.5px solid #ff007f; color: #ff007f; box-shadow: 0 0 10px rgba(255,0,127,0.2); }
+    .list-box { background: #121222; border: 1px solid #1f1f3a; border-radius: 8px; padding: 10px; margin-bottom: 15px; text-align: left; font-size: 0.8rem; color: #ccc; max-height: 120px; overflow-y: auto; }
   </style>
 </head>
 <body>
@@ -27,27 +28,27 @@
   <!-- Menu Principal -->
   <div id="mainMenu" class="menu-screen" style="display: block;">
     <h1>⚡ NEON RUSH</h1>
-    <p>Ultimate Cyberpunk Edition</p>
+    <p>Cyberstorm Edition</p>
     <button class="btn" onclick="startGame()">JOGAR</button>
-    <button class="btn btn-secondary" onclick="openShop()">LOJA DE SKINS</button>
-    <button class="btn btn-secondary" onclick="openAchievements()">CONQUISTAS</button>
+    <button class="btn btn-secondary" onclick="openMissions()">MISSÕES DIÁRIAS</button>
+    <button class="btn btn-secondary" onclick="openRecords()">HISTÓRICO DE RECORDES</button>
+    <button class="btn" onclick="window.location.href='https://nexa-business-chi.vercel.app'" style="background:#333; color:#fff;">VOLTAR À NEXA APPS</button>
   </div>
 
-  <!-- Loja de Skins -->
-  <div id="shopMenu" class="menu-screen">
-    <h1>LOJA DE SKINS</h1>
-    <p>Personaliza o teu Corredor Neon</p>
-    <button class="btn" onclick="selectSkin('#00f0ff', 'Cyan Cyber')">Cyan Cyber (Atual)</button>
-    <button class="btn btn-secondary" onclick="selectSkin('#ff007f', 'Hot Pink VIP')">Hot Pink VIP (💎 50)</button>
-    <button class="btn btn-secondary" onclick="selectSkin('#ffe600', 'Gold Runner')">Gold Runner (💎 100)</button>
-    <button class="btn" onclick="closeShop()" style="background:#333; color:#fff; margin-top:15px;">VOLTAR</button>
+  <!-- Missões Diárias -->
+  <div id="missionsMenu" class="menu-screen">
+    <h1>MISSÕES</h1>
+    <p>Completa desafios para ganhar bónus</p>
+    <div class="list-box" id="missionText">Carregando missões...</div>
+    <button class="btn" onclick="closeMissions()" style="background:#333; color:#fff;">VOLTAR</button>
   </div>
 
-  <!-- Conquistas -->
-  <div id="achievementsMenu" class="menu-screen">
-    <h1>CONQUISTAS</h1>
-    <p id="achList">Carregando marcos...</p>
-    <button class="btn" onclick="closeAchievements()" style="background:#333; color:#fff; margin-top:15px;">VOLTAR</button>
+  <!-- Histórico de Recordes -->
+  <div id="recordsMenu" class="menu-screen">
+    <h1>RECORDES</h1>
+    <p>As tuas melhores corridas</p>
+    <div class="list-box" id="recordsList">Sem registos ainda.</div>
+    <button class="btn" onclick="closeRecords()" style="background:#333; color:#fff;">VOLTAR</button>
   </div>
 
   <!-- Game Over -->
@@ -58,27 +59,25 @@
     <button class="btn btn-secondary" onclick="goHome()">MENU PRINCIPAL</button>
   </div>
 
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  <canvas id="gameCanvas" width="380" height="550"></canvas>
 
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let gameState = "MENU"; // MENU, SHOP, ACHIEVEMENTS, PLAYING, GAMEOVER
+    let gameState = "MENU";
     let score = 0;
     let crystals = parseInt(localStorage.getItem("nr_crystals") || "0");
-    let currentSkin = localStorage.getItem("nr_skin") || "#00f0ff";
-    let highscore = parseInt(localStorage.getItem("nr_high") || "0");
-    let achievements = JSON.parse(localStorage.getItem("nr_ach") || '{"m500":false, "c50":false}');
+    let records = JSON.parse(localStorage.getItem("nr_records") || "[]");
+    
+    // Missões
+    let missionCompleted = localStorage.getItem("nr_mission") === "true";
 
-    // Controlos e Mecânicas
-    let player = { x: 180, y: 480, w: 35, h: 55, vy: 0, gravity: 0.6, jump: -11, grounded: false };
+    let player = { x: 170, y: 440, w: 35, h: 50, vy: 0, gravity: 0.65, jump: -11, grounded: false };
     let obstacles = [];
     let items = [];
     let particles = [];
-    let powerupTimer = 0;
-    let powerupType = null; // 'turbo', 'shield', 'double'
-    let shakeTimer = 0;
+    let rainDrops = [];
     let frameCount = 0;
 
     function startGame() {
@@ -88,10 +87,8 @@
       obstacles = [];
       items = [];
       particles = [];
-      player.y = 480;
+      player.y = 440;
       player.vy = 0;
-      powerupTimer = 0;
-      powerupType = null;
     }
 
     function goHome() {
@@ -100,30 +97,30 @@
       gameState = "MENU";
     }
 
-    function openShop() {
+    function openMissions() {
       document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('shopMenu').style.display = 'block';
+      document.getElementById('missionsMenu').style.display = 'block';
+      let status = missionCompleted ? "✅ Concluída! (Bónus resgatado)" : "🎯 Meta: Atingir 300 pontos numa partida.";
+      document.getElementById('missionText').innerHTML = status;
     }
-    function closeShop() {
-      document.getElementById('shopMenu').style.display = 'none';
+    function closeMissions() {
+      document.getElementById('missionsMenu').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
     }
 
-    function selectSkin(color, name) {
-      currentSkin = color;
-      localStorage.setItem("nr_skin", color);
-      alert("Skin " + name + " selecionada!");
-    }
-
-    function openAchievements() {
+    function openRecords() {
       document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('achievementsMenu').style.display = 'block';
-      let text = "🏆 500+ Pontos: " + (achievements.m500 ? "✅ Desbloqueado" : "❌ Bloqueado") + "<br>" +
-                 "💎 50+ Cristais: " + (achievements.c50 ? "✅ Desbloqueado" : "❌ Bloqueado");
-      document.getElementById('achList').innerHTML = text;
+      document.getElementById('recordsMenu').style.display = 'block';
+      if (records.length === 0) {
+        document.getElementById('recordsList').innerHTML = "Ainda sem recordes guardados.";
+      } else {
+        let html = "";
+        records.forEach((r, idx) => { html += `<b>#${idx+1}</b> - ${r.score} pts (${r.date})<br>`; });
+        document.getElementById('recordsList').innerHTML = html;
+      }
     }
-    function closeAchievements() {
-      document.getElementById('achievementsMenu').style.display = 'none';
+    function closeRecords() {
+      document.getElementById('recordsMenu').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
     }
 
@@ -131,8 +128,7 @@
       if (gameState === "PLAYING" && player.grounded) {
         player.vy = player.jump;
         player.grounded = false;
-        // Partículas de Salto
-        for(let i=0; i<8; i++) particles.push({x: player.x + player.w/2, y: player.y + player.h, vx: (Math.random()-0.5)*4, vy: Math.random()*2, color: currentSkin, life: 20});
+        for(let i=0; i<6; i++) particles.push({x: player.x + 15, y: player.y + 50, vx: (Math.random()-0.5)*4, vy: Math.random()*2, color: '#00f0ff', life: 15});
       }
     });
 
@@ -140,77 +136,55 @@
       if (gameState !== "PLAYING") return;
 
       frameCount++;
-      score += (powerupType === 'turbo' ? 2 : 1);
+      score += 1;
 
-      // Conquistas
-      if (score >= 500 && !achievements.m500) { achievements.m500 = true; localStorage.setItem("nr_ach", JSON.stringify(achievements)); }
-      if (crystals >= 50 && !achievements.c50) { achievements.c50 = true; localStorage.setItem("nr_ach", JSON.stringify(achievements)); }
+      // Verificar Missão
+      if (score >= 300 && !missionCompleted) {
+        missionCompleted = true;
+        crystals += 20;
+        localStorage.setItem("nr_mission", "true");
+        localStorage.setItem("nr_crystals", crystals);
+      }
 
-      // Física do Player
       player.vy += player.gravity;
       player.y += player.vy;
-      if (player.y > 480) { player.y = 480; player.vy = 0; player.grounded = true; }
+      if (player.y > 440) { player.y = 440; player.vy = 0; player.grounded = true; }
 
-      // Rasto de luz do Corredor (Partículas)
-      if (frameCount % 2 === 0) {
-        particles.push({x: player.x + player.w/2, y: player.y + player.h/2, vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2, color: currentSkin, life: 15});
+      // Chuva Cyberstorm de fundo
+      if (frameCount % 3 === 0) {
+        rainDrops.push({ x: Math.random() * canvas.width, y: 0, speed: Math.random() * 6 + 4, len: Math.random() * 15 + 10 });
+      }
+      rainDrops.forEach(rd => rd.y += rd.speed);
+      rainDrops = rainDrops.filter(rd => rd.y < canvas.height);
+
+      // Obstáculos e Itens
+      if (frameCount % 85 === 0) {
+        obstacles.push({ x: Math.floor(Math.random()*3) * 100 + 40, y: -40, w: 35, h: 35, speed: 5 });
+      }
+      if (frameCount % 110 === 0) {
+        items.push({ x: Math.floor(Math.random()*3) * 100 + 45, y: -30, w: 22, h: 22 });
       }
 
-      // Spawner de Obstáculos
-      if (frameCount % 90 === 0) {
-        obstacles.push({ x: Math.floor(Math.random()*3) * 110 + 45, y: -40, w: 40, h: 40, speed: (powerupType === 'turbo' ? 8 : 4.5) });
-      }
-
-      // Spawner de Cristais e Power-ups
-      if (frameCount % 120 === 0) {
-        items.push({ x: Math.floor(Math.random()*3) * 110 + 50, y: -30, w: 25, h: 25, type: Math.random() > 0.3 ? 'crystal' : 'powerup' });
-      }
-
-      // Atualizar Obstáculos
+      // Colisões Obstáculos
       for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].y += obstacles[i].speed;
-        // Colisão
         if (player.x < obstacles[i].x + obstacles[i].w && player.x + player.w > obstacles[i].x &&
             player.y < obstacles[i].y + obstacles[i].h && player.y + player.h > obstacles[i].y) {
-          if (powerupType === 'shield') {
-            powerupType = null; // Absorve o dano
-            obstacles.splice(i, 1);
-          } else {
-            shakeTimer = 15; // Screen Shake
-            gameOver();
-          }
+          gameOver();
         }
-        if (obstacles[i] && obstacles[i].y > 600) obstacles.splice(i, 1);
+        if (obstacles[i] && obstacles[i].y > 550) obstacles.splice(i, 1);
       }
 
-      // Atualizar Itens
+      // Colisões Cristais
       for (let i = items.length - 1; i >= 0; i--) {
-        items[i].y += 4.5;
+        items[i].y += 5;
         if (player.x < items[i].x + items[i].w && player.x + player.w > items[i].x &&
             player.y < items[i].y + items[i].h && player.y + player.h > items[i].y) {
-          if (items[i].type === 'crystal') {
-            crystals += 5;
-            localStorage.setItem("nr_crystals", crystals);
-          } else {
-            powerupType = Math.random() > 0.5 ? 'turbo' : 'shield';
-            powerupTimer = 300; // Duração
-          }
+          crystals += 5;
+          localStorage.setItem("nr_crystals", crystals);
           items.splice(i, 1);
         }
-        if (items[i] && items[i].y > 600) items.splice(i, 1);
-      }
-
-      if (powerupTimer > 0) {
-        powerupTimer--;
-        if (powerupTimer === 0) powerupType = null;
-      }
-
-      // Atualizar Partículas
-      for (let i = particles.length - 1; i >= 0; i--) {
-        particles[i].x += particles[i].vx;
-        particles[i].y += particles[i].vy;
-        particles[i].life--;
-        if (particles[i].life <= 0) particles.splice(i, 1);
+        if (items[i] && items[i].y > 550) items.splice(i, 1);
       }
 
       document.getElementById("scoreDisplay").innerText = "SCORE: " + score;
@@ -219,55 +193,43 @@
 
     function gameOver() {
       gameState = "GAMEOVER";
-      if (score > highscore) { highscore = score; localStorage.setItem("nr_high", highscore); }
-      document.getElementById("finalStats").innerText = "Pontuação Final: " + score + " | Recorde: " + highscore;
+      let today = new Date().toLocaleDateString();
+      records.push({ score: score, date: today });
+      records.sort((a, b) => b.score - a.score);
+      if (records.length > 5) records.pop(); // Guardar top 5
+      localStorage.setItem("nr_records", JSON.stringify(records));
+
+      document.getElementById("finalStats").innerText = "Pontuação Final: " + score;
       document.getElementById("gameOverMenu").style.display = "block";
     }
 
     function draw() {
-      ctx.save();
-      // Efeito Screen Shake
-      if (shakeTimer > 0) {
-        shakeTimer--;
-        ctx.translate((Math.random()-0.5)*10, (Math.random()-0.5)*10);
-      }
-
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Linhas de perspectiva Cyberpunk do chão
-      ctx.strokeStyle = "rgba(0, 240, 255, 0.15);";
-      ctx.lineWidth = 2;
-      for (let i = 0; i < canvas.width; i += 40) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
-      }
-
-      // Desenhar Partículas
-      particles.forEach(p => {
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, 4, 4);
+      // Chuva Cyberpunk
+      ctx.strokeStyle = "rgba(0, 240, 255, 0.3)";
+      ctx.lineWidth = 1;
+      rainDrops.forEach(rd => {
+        ctx.beginPath(); ctx.moveTo(rd.x, rd.y); ctx.lineTo(rd.x, rd.y + rd.len); ctx.stroke();
       });
 
-      // Desenhar Player com Skin e Efeito Glow
-      ctx.fillStyle = currentSkin;
-      ctx.shadowColor = currentSkin;
-      ctx.shadowBlur = 15;
+      // Player
+      ctx.fillStyle = "#00f0ff";
+      ctx.shadowColor = "#00f0ff";
+      ctx.shadowBlur = 12;
       ctx.fillRect(player.x, player.y, player.w, player.h);
-      ctx.shadowBlur = 0; // Reset
+      ctx.shadowBlur = 0;
 
-      // Desenhar Obstáculos (Blocos Vermelhos de Néon)
+      // Obstáculos
       ctx.fillStyle = "#ff007f";
       ctx.shadowColor = "#ff007f";
       ctx.shadowBlur = 10;
       obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
       ctx.shadowBlur = 0;
 
-      // Desenhar Cristais e Power-ups
-      items.forEach(it => {
-        ctx.fillStyle = it.type === 'crystal' ? '#00f0ff' : '#ffe600';
-        ctx.fillRect(it.x, it.y, it.w, it.h);
-      });
-
-      ctx.restore();
+      // Cristais
+      ctx.fillStyle = "#ffe600";
+      items.forEach(it => ctx.fillRect(it.x, it.y, it.w, it.h));
     }
 
     function loop() {
