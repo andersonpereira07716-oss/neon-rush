@@ -15,12 +15,9 @@
     .btn { background: #00f0ff; color: #080811; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; font-size: 0.95rem; cursor: pointer; margin-bottom: 8px; transition: 0.2s; box-shadow: 0 0 10px rgba(0,240,255,0.4); }
     .btn:active { transform: scale(0.97); }
     .btn-secondary { background: rgba(255,0,127,0.15); border: 1.5px solid #ff007f; color: #ff007f; box-shadow: 0 0 10px rgba(255,0,127,0.2); }
-    #pauseBtn { position: absolute; top: 12px; right: 15px; background: rgba(0,240,255,0.1); border: 1px solid #00f0ff; color: #00f0ff; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; z-index: 6; display: none; }
   </style>
 </head>
 <body>
-
-  <button id="pauseBtn" onclick="togglePause()">⏸ PAUSE</button>
 
   <div id="ui-overlay">
     <div id="scoreDisplay">SCORE: 0</div>
@@ -34,7 +31,7 @@
     <p>Ultimate Cyberstorm</p>
     <button class="btn" onclick="startGame()">JOGAR</button>
     <button class="btn btn-secondary" onclick="openShop()">LOJA DE SKINS</button>
-    <button class="btn btn-secondary" onclick="openRecords()">HISTÓRICO DE RECORDES</button>
+    <button class="btn btn-secondary" onclick="openRecords()">HISTÓRICO</button>
     <button class="btn" onclick="window.location.href='https://nexa-business-chi.vercel.app'" style="background:#333; color:#fff;">VOLTAR À NEXA APPS</button>
   </div>
 
@@ -50,16 +47,9 @@
 
   <!-- Recordes -->
   <div id="recordsMenu" class="menu-screen">
-    <h1>RECORDES</h1>
+    <h1>HISTÓRICO</h1>
     <div id="recordsList" style="font-size:0.85rem; color:#ccc; margin-bottom:15px; text-align:left;">Sem registos.</div>
     <button class="btn" onclick="closeRecords()" style="background:#333; color:#fff;">VOLTAR</button>
-  </div>
-
-  <!-- Menu de Pause -->
-  <div id="pauseMenu" class="menu-screen">
-    <h1>JOGO PAUSADO</h1>
-    <button class="btn" onclick="togglePause()">RETOMAR</button>
-    <button class="btn btn-secondary" onclick="goHome()">MENU PRINCIPAL</button>
   </div>
 
   <!-- Game Over -->
@@ -76,7 +66,7 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    let gameState = "MENU"; // MENU, PLAYING, PAUSED, SHOP, RECORDS, GAMEOVER
+    let gameState = "MENU";
     let score = 0;
     let hp = 3;
     let crystals = parseInt(localStorage.getItem("nr_crystals") || "0");
@@ -91,7 +81,6 @@
 
     function startGame() {
       document.querySelectorAll('.menu-screen').forEach(m => m.style.display = 'none');
-      document.getElementById('pauseBtn').style.display = 'block';
       gameState = "PLAYING";
       score = 0;
       hp = 3;
@@ -104,21 +93,8 @@
 
     function goHome() {
       document.querySelectorAll('.menu-screen').forEach(m => m.style.display = 'none');
-      document.getElementById('pauseBtn').style.display = 'none';
       document.getElementById('mainMenu').style.display = 'block';
       gameState = "MENU";
-    }
-
-    function togglePause() {
-      if (gameState === "PLAYING") {
-        gameState = "PAUSED";
-        document.getElementById('pauseMenu').style.display = 'block';
-        document.getElementById('pauseBtn').style.display = 'none';
-      } else if (gameState === "PAUSED") {
-        document.getElementById('pauseMenu').style.display = 'none';
-        document.getElementById('pauseBtn').style.display = 'block';
-        gameState = "PLAYING";
-      }
     }
 
     function openShop() {
@@ -166,11 +142,9 @@
       player.y += player.vy;
       if (player.y > 440) { player.y = 440; player.vy = 0; player.grounded = true; }
 
-      // Spawners
       if (frameCount % 80 === 0) obstacles.push({ x: Math.floor(Math.random()*3) * 100 + 40, y: -40, w: 35, h: 35, speed: 5.5 });
       if (frameCount % 100 === 0) items.push({ x: Math.floor(Math.random()*3) * 100 + 45, y: -30, w: 22, h: 22 });
 
-      // Atualizar Obstáculos
       for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].y += obstacles[i].speed;
         if (player.x < obstacles[i].x + obstacles[i].w && player.x + player.w > obstacles[i].x &&
@@ -182,7 +156,6 @@
         if (obstacles[i] && obstacles[i].y > 550) obstacles.splice(i, 1);
       }
 
-      // Atualizar Cristais
       for (let i = items.length - 1; i >= 0; i--) {
         items[i].y += 5;
         if (player.x < items[i].x + items[i].w && player.x + player.w > items[i].x &&
@@ -201,7 +174,6 @@
 
     function gameOver() {
       gameState = "GAMEOVER";
-      document.getElementById('pauseBtn').style.display = 'none';
       records.push({ score: score, date: new Date().toLocaleDateString() });
       records.sort((a,b) => b.score - a.score);
       if(records.length > 5) records.pop();
@@ -214,18 +186,15 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Player com Skin selecionada
       ctx.fillStyle = currentSkin;
       ctx.shadowColor = currentSkin;
       ctx.shadowBlur = 15;
       ctx.fillRect(player.x, player.y, player.w, player.h);
       ctx.shadowBlur = 0;
 
-      // Obstáculos
       ctx.fillStyle = "#ff007f";
       obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
 
-      // Cristais
       ctx.fillStyle = "#ffe600";
       items.forEach(it => ctx.fillRect(it.x, it.y, it.w, it.h));
     }
